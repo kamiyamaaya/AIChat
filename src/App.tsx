@@ -68,70 +68,84 @@ function App() {
   }, [messages]);
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-10 sm:py-20 font-sans">
-      <div className="w-full max-w-2xl text-[90%]">
-        {/* タイトルと切替ボタン */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">
-            AIチャットくん 🤖
-          </h1>
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-6 sm:py-12 font-sans">
+      <div className="w-full max-w-2xl">
+        {/* ヘッダー（タイトル＋言語切替） */}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl sm:text-3xl font-bold text-blue-800">AIチャットくん 🤖</h1>
           <button
-            className="text-xs sm:text-sm text-gray-600 border px-2 sm:px-3 py-1 rounded hover:bg-gray-100"
+            className="text-xs sm:text-sm text-gray-600 border px-2 sm:px-3 py-1 rounded hover:bg-gray-100 transition"
             onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}
           >
             {lang === 'ja' ? '英語に切り替え' : 'Switch to Japanese'}
           </button>
         </div>
 
-        {/* チャット表示エリア */}
-        <div className="border rounded p-3 sm:p-4 min-h-[200px] bg-gray-50">
+        {/* チャット表示エリア（バブル形式） */}
+        <div className="h-[400px] sm:h-[500px] overflow-y-auto border rounded-lg p-4 bg-gray-50 space-y-3">
           {messages.length === 0 ? (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-400 text-center">
               ({t('メッセージはまだありません', 'No messages yet')})
             </p>
           ) : (
             messages.map((msg, idx) => (
-              <div key={idx} className={`mb-3 ${msg.role === 'assistant' ? 'border-b pb-2' : ''}`}>
-                <p
-                  className={`text-sm mt-1 ${msg.role === 'user' ? 'text-right text-gray-700' : 'text-left text-gray-800'}`}
+              <div
+                key={idx}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`rounded-xl px-4 py-2 max-w-[80%] text-sm whitespace-pre-wrap shadow ${msg.role === 'user' ? 'bg-blue-100 text-gray-800' : 'bg-gray-200 text-gray-800'} transition-all`}
                 >
-                  <span className="font-semibold">{msg.role === 'user' ? t('ユーザー', 'User') : t('AI', 'AI')}：</span>
+                  <span className="block font-semibold mb-1">
+                    {msg.role === 'user' ? t('ユーザー', 'User') : t('AI', 'AI')}：
+                  </span>
                   {msg.content}
-                </p>
+                </div>
               </div>
             ))
           )}
-          {/* 読み込み中表示 */}
-          {loading && <p className="text-sm text-gray-400 italic">{t('考え中...', 'Thinking...')}</p>}
+          {/* ローディング中の表示（スピナー） */}
+          {loading && (
+            <div className="flex items-center gap-2 text-sm text-gray-400 italic">
+              <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gray-400"></span>
+              {t('考え中...', 'Thinking...')}
+            </div>
+          )}
           <div ref={bottomRef} />
         </div>
 
-        {/* 入力と送信ボタン */}
+        {/* 入力エリア＋送信ボタン */}
         <div className="mt-4 flex flex-col sm:flex-row gap-2">
           <textarea
-            className="w-full border rounded p-2 text-sm"
+            className="w-full border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('質問を入力してください（Enter で送信 / Shift+Enter で改行）', 'Enter your question (Enter to send / Shift+Enter for new line)')}
+            onBlur={() => window.scrollTo({ top: 0 })}
+            placeholder={t(
+              '質問を入力してください（Enter で送信 / Shift+Enter で改行）',
+              'Enter your question (Enter to send / Shift+Enter for new line)'
+            )}
           />
           <button
             onClick={handleSend}
             disabled={loading}
-            className="border px-4 py-2 rounded text-sm hover:bg-gray-100"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm transition disabled:opacity-50"
           >
             {t('送信', 'Send')}
           </button>
         </div>
 
         {/* 履歴クリアボタン */}
-        <button
-          className="mt-2 text-sm text-gray-600 hover:underline"
-          onClick={() => setMessages([])}
-        >
-          {t('履歴をクリア', 'Clear history')}
-        </button>
+        <div className="mt-3 text-right">
+          <button
+            className="text-xs sm:text-sm text-gray-600 hover:underline"
+            onClick={() => setMessages([])}
+          >
+            {t('履歴をクリア', 'Clear history')}
+          </button>
+        </div>
       </div>
     </div>
   );
